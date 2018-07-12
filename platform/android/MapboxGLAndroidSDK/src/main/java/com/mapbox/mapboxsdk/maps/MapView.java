@@ -3,6 +3,7 @@ package com.mapbox.mapboxsdk.maps;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
+import android.graphics.drawable.ColorDrawable;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
@@ -126,6 +127,11 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       // in IDE layout editor, just return
       return;
     }
+
+    // hide surface until map is fully loaded #10990
+    setForeground(new ColorDrawable(options.getForegroundLoadColor()));
+    mapCallback.addOnMapReadyCallback(new InitialStyleLoadedCallback(this));
+
     mapboxMapOptions = options;
 
     // inflate view
@@ -977,6 +983,23 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       mapGestureDetector.setFocalPoint(pointF);
       for (FocalPointChangeListener focalPointChangeListener : focalPointChangeListeners) {
         focalPointChangeListener.onFocalPointChanged(pointF);
+      }
+    }
+  }
+
+  private static class InitialStyleLoadedCallback implements OnMapReadyCallback {
+
+    private WeakReference<MapView> weakReference;
+
+    InitialStyleLoadedCallback(MapView mapView) {
+      this.weakReference = new WeakReference<>(mapView);
+    }
+
+    @Override
+    public void onMapReady(MapboxMap mapboxMap) {
+      MapView mapView = weakReference.get();
+      if (mapView != null && !mapView.isDestroyed()) {
+        mapView.setForeground(null);
       }
     }
   }

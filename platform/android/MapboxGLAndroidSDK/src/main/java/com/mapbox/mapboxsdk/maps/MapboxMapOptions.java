@@ -3,6 +3,7 @@ package com.mapbox.mapboxsdk.maps;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
@@ -73,6 +74,9 @@ public class MapboxMapOptions implements Parcelable {
   private boolean textureMode;
   private boolean translucentTextureSurface;
 
+  @ColorInt
+  private int foregroundLoadColor;
+
   private String style;
 
   private float pixelRatio;
@@ -124,6 +128,7 @@ public class MapboxMapOptions implements Parcelable {
     zMediaOverlay = in.readByte() != 0;
     localIdeographFontFamily = in.readString();
     pixelRatio = in.readFloat();
+    foregroundLoadColor = in.readInt();
   }
 
   /**
@@ -222,6 +227,9 @@ public class MapboxMapOptions implements Parcelable {
         typedArray.getString(R.styleable.mapbox_MapView_mapbox_localIdeographFontFamily));
       mapboxMapOptions.pixelRatio(
         typedArray.getFloat(R.styleable.mapbox_MapView_mapbox_pixelRatio, 0));
+      mapboxMapOptions.foregroundLoadColor(
+        typedArray.getInt(R.styleable.mapbox_MapView_mapbox_foregroundLoadColor, Color.WHITE)
+      );
     } finally {
       typedArray.recycle();
     }
@@ -518,6 +526,17 @@ public class MapboxMapOptions implements Parcelable {
 
   public MapboxMapOptions translucentTextureSurface(boolean translucentTextureSurface) {
     this.translucentTextureSurface = translucentTextureSurface;
+    return this;
+  }
+
+  /**
+   * Set the MapView foreground color that is used when the map surface is being created.
+   *
+   * @param loadColor the color to show during map creation
+   * @return This
+   */
+  public MapboxMapOptions foregroundLoadColor(@ColorInt int loadColor) {
+    this.foregroundLoadColor =  loadColor;
     return this;
   }
 
@@ -820,6 +839,16 @@ public class MapboxMapOptions implements Parcelable {
   }
 
   /**
+   * Returns the current configured foreground color that is used during map creation.
+   *
+   * @return the load color
+   */
+  @ColorInt
+  public int getForegroundLoadColor() {
+    return foregroundLoadColor;
+  }
+
+  /**
    * Returns the font-family for locally overriding generation of glyphs in the
    * &#x27;CJK Unified Ideographs&#x27; and &#x27;Hangul Syllables&#x27; ranges.
    *
@@ -892,6 +921,7 @@ public class MapboxMapOptions implements Parcelable {
     dest.writeByte((byte) (zMediaOverlay ? 1 : 0));
     dest.writeString(localIdeographFontFamily);
     dest.writeFloat(pixelRatio);
+    dest.writeInt(foregroundLoadColor);
   }
 
   @Override
